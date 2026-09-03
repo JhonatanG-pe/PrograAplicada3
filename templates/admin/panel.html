@@ -1,0 +1,11 @@
+{% extends "admin/base_admin.html" %}
+{% block contenido %}
+    <h3>Bienvenido, {{ session.nombre_completo }}</h3>
+    <p class="text-muted">
+        Este es el panel del administrador. Aquí irá la gestión de productos
+        y la reposición de stock cuando un producto se quede sin unidades.
+    </p>
+    <div class="alert alert-info">
+        Próximo paso: listado de productos con su stock actual y botón para reponer unidades.
+    </div>
+{% endblock %}
