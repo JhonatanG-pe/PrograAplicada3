@@ -28,6 +28,13 @@
         </nav>
 
         <main class="p-4 flex-grow-1">
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+                {% if mensajes %}
+                    {% for categoria, mensaje in mensajes %}
+                        <div class="alert alert-{{ 'success' if categoria == 'success' else 'danger' }} py-2">{{ mensaje }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             {% block contenido %}{% endblock %}
         </main>
     </div>

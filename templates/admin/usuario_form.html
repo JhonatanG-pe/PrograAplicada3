@@ -1,0 +1,56 @@
+{% extends "admin/base_admin.html" %}
+{% block contenido %}
+    <h3>Nuevo usuario</h3>
+
+    <form method="POST" class="mt-3" style="max-width: 480px;">
+        <div class="row">
+            <div class="col-6 mb-3">
+                <label class="form-label">DNI *</label>
+                <input type="text" name="dni" class="form-control" required maxlength="15">
+            </div>
+            <div class="col-6 mb-3">
+                <label class="form-label">Celular</label>
+                <input type="text" name="celular" class="form-control" maxlength="15">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nombres *</label>
+            <input type="text" name="nombres" class="form-control" required maxlength="40">
+        </div>
+
+        <div class="row">
+            <div class="col-6 mb-3">
+                <label class="form-label">Apellido paterno *</label>
+                <input type="text" name="apellido_paterno" class="form-control" required maxlength="40">
+            </div>
+            <div class="col-6 mb-3">
+                <label class="form-label">Apellido materno</label>
+                <input type="text" name="apellido_materno" class="form-control" maxlength="40">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Correo electrónico *</label>
+            <input type="email" name="correo" class="form-control" required maxlength="40">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Contraseña *</label>
+            <input type="password" name="clave" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Perfil *</label>
+            <select name="id_perfil" class="form-select" required>
+                <option value="" selected disabled>Selecciona un perfil</option>
+                {% for perfil in perfiles %}
+                    <option value="{{ perfil.id }}">{{ perfil.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-dark">Crear usuario</button>
+        <a href="{{ url_for('admin.lista_usuarios') }}" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}

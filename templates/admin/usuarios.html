@@ -1,0 +1,36 @@
+{% extends "admin/base_admin.html" %}
+{% block contenido %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Usuarios</h3>
+        <a href="{{ url_for('admin.nuevo_usuario') }}" class="btn btn-dark btn-sm">+ Nuevo usuario</a>
+    </div>
+
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Perfil(es)</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.Nombres }} {{ usuario.ApellidoPaterno }}</td>
+                <td>{{ usuario.CorreoElectronico }}</td>
+                <td>{{ usuario.Perfiles or '—' }}</td>
+                <td>
+                    {% if usuario.EstadoRegistro %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-muted text-center">Aún no hay usuarios registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
