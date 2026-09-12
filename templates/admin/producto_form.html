@@ -1,0 +1,73 @@
+{% extends "admin/base_admin.html" %}
+{% block contenido %}
+    <h3>{{ 'Editar producto' if producto else 'Nuevo producto' }}</h3>
+
+    <form method="POST" style="max-width: 520px;">
+        <div class="mb-3">
+            <label class="form-label">Nombre *</label>
+            <input type="text" name="nombre" class="form-control" required maxlength="500"
+                   value="{{ producto.Nombre if producto else '' }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea name="descripcion" class="form-control" rows="2">{{ producto.Descripcion if producto else '' }}</textarea>
+        </div>
+
+        <div class="row">
+            <div class="col-6 mb-3">
+                <label class="form-label">Categoría</label>
+                <select name="id_categoria" class="form-select">
+                    <option value="">Sin categoría</option>
+                    {% for c in categorias %}
+                        <option value="{{ c.IdCategoria }}"
+                            {% if producto and producto.IdCategoria == c.IdCategoria %}selected{% endif %}>
+                            {{ c.Descripcion }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 mb-3">
+                <label class="form-label">Marca</label>
+                <select name="id_marca" class="form-select">
+                    <option value="">Sin marca</option>
+                    {% for m in marcas %}
+                        <option value="{{ m.IdMarca }}"
+                            {% if producto and producto.IdMarca == m.IdMarca %}selected{% endif %}>
+                            {{ m.Descripcion }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-4 mb-3">
+                <label class="form-label">Precio (S/) *</label>
+                <input type="number" step="0.01" min="0" name="precio" class="form-control" required
+                       value="{{ producto.Precio if producto else '' }}">
+            </div>
+            <div class="col-4 mb-3">
+                <label class="form-label">Stock actual *</label>
+                <input type="number" min="0" name="stock" class="form-control" required
+                       value="{{ producto.Stock if producto else 0 }}">
+            </div>
+            <div class="col-4 mb-3">
+                <label class="form-label">Stock mínimo</label>
+                <input type="number" min="0" name="stock_minimo" class="form-control"
+                       value="{{ producto.StockMinimo if producto else 5 }}">
+            </div>
+        </div>
+
+        {% if producto %}
+        <div class="form-check mb-3">
+            <input type="checkbox" name="activo" class="form-check-input" id="activo"
+                   {% if producto.Activo %}checked{% endif %}>
+            <label class="form-check-label" for="activo">Activo</label>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-dark">Guardar</button>
+        <a href="{{ url_for('admin.lista_productos') }}" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}

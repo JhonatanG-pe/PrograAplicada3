@@ -1,0 +1,23 @@
+{% extends "admin/base_admin.html" %}
+{% block contenido %}
+    <h3>{{ 'Editar marca' if marca else 'Nueva marca' }}</h3>
+
+    <form method="POST" style="max-width: 420px;">
+        <div class="mb-3">
+            <label class="form-label">Descripción *</label>
+            <input type="text" name="descripcion" class="form-control" required maxlength="100"
+                   value="{{ marca.Descripcion if marca else '' }}">
+        </div>
+
+        {% if marca %}
+        <div class="form-check mb-3">
+            <input type="checkbox" name="activo" class="form-check-input" id="activo"
+                   {% if marca.Activo %}checked{% endif %}>
+            <label class="form-check-label" for="activo">Activa</label>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-dark">Guardar</button>
+        <a href="{{ url_for('admin.lista_marcas') }}" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}

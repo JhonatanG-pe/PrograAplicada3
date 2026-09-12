@@ -3,6 +3,7 @@ from flask import Flask, redirect, url_for
 from dotenv import load_dotenv
 
 from routes.administrador import admin_bp
+from routes import catalogo  # registra las rutas de categorías/marcas/productos en admin_bp
 from routes.cliente import cliente_bp
 
 load_dotenv()
