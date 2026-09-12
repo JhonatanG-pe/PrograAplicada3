@@ -5,8 +5,9 @@ Aun así, siempre se valida en el servidor que el usuario tenga
 realmente el perfil 'Administrador' en Usuario_Perfiles antes de dejarlo entrar.
 """
 from functools import wraps
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from db import obtener_conexion
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -124,3 +125,79 @@ def panel():
 def logout():
     session.clear()
     return redirect(url_for('admin.login'))
+
+
+@admin_bp.route('/usuarios')
+@admin_requerido
+def lista_usuarios():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute(
+        """
+        SELECT u.IdUsuario, u.Nombres, u.ApellidoPaterno, u.CorreoElectronico,
+               u.EstadoRegistro, STRING_AGG(p.Nombre, ', ') AS Perfiles
+        FROM Usuario u
+        LEFT JOIN Usuario_Perfiles up ON up.IdUsuario = u.IdUsuario AND up.EstadoRegistro = 1
+        LEFT JOIN Perfiles p ON p.IdPerfil = up.IdPerfil
+        GROUP BY u.IdUsuario, u.Nombres, u.ApellidoPaterno, u.CorreoElectronico, u.EstadoRegistro
+        ORDER BY u.Nombres
+        """
+    )
+    usuarios = cursor.fetchall()
+    conexion.close()
+    return render_template('admin/usuarios.html', usuarios=usuarios)
+
+
+@admin_bp.route('/usuarios/nuevo', methods=['GET', 'POST'])
+@admin_requerido
+def nuevo_usuario():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT IdPerfil, Nombre FROM Perfiles WHERE EstadoRegistro = 1 ORDER BY Nombre")
+    perfiles = [{'id': fila.IdPerfil, 'nombre': fila.Nombre} for fila in cursor.fetchall()]
+
+    if request.method == 'POST':
+        dni = request.form.get('dni', '').strip()
+        nombres = request.form.get('nombres', '').strip()
+        apellido_paterno = request.form.get('apellido_paterno', '').strip()
+        apellido_materno = request.form.get('apellido_materno', '').strip() or None
+        celular = request.form.get('celular', '').strip() or None
+        correo = request.form.get('correo', '').strip()
+        clave = request.form.get('clave', '')
+        id_perfil = request.form.get('id_perfil', '')
+
+        campos_obligatorios = (dni, nombres, apellido_paterno, correo, clave, id_perfil)
+        if not all(campos_obligatorios):
+            conexion.close()
+            flash('Completa todos los campos obligatorios.', 'error')
+            return render_template('admin/usuario_form.html', perfiles=perfiles)
+
+        clave_hash = generate_password_hash(clave)
+        try:
+            cursor.execute(
+                """
+                INSERT INTO Usuario (DNI, Nombres, ApellidoPaterno, ApellidoMaterno, Celular,
+                                      CorreoElectronico, Clave, UsuarioCreacion, FechaCreacion, EstadoRegistro)
+                OUTPUT INSERTED.IdUsuario
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                """,
+                dni, nombres, apellido_paterno, apellido_materno, celular,
+                correo, clave_hash, session['id_usuario'], datetime.now(),
+            )
+            id_usuario_nuevo = cursor.fetchone()[0]
+            cursor.execute(
+                "INSERT INTO Usuario_Perfiles (IdUsuario, IdPerfil, EstadoRegistro) VALUES (?, ?, 1)",
+                id_usuario_nuevo, int(id_perfil),
+            )
+            conexion.commit()
+            conexion.close()
+            flash('Usuario creado correctamente.', 'success')
+            return redirect(url_for('admin.lista_usuarios'))
+        except Exception as error:
+            conexion.rollback()
+            conexion.close()
+            flash(f'No se pudo crear el usuario: {error}', 'error')
+            return render_template('admin/usuario_form.html', perfiles=perfiles)
+
+    conexion.close()
+    return render_template('admin/usuario_form.html', perfiles=perfiles)
